@@ -8,7 +8,7 @@ export default {
                 meal: [(v) => !!v || "Meal is required"],
                 totalPeoples: [
                     (v) => !!v || "Total of people is required",
-                    (v) => (v && v < 10) || "Total of people must be less than 10",
+                    (v) => (v && v <= 10) || "Total of people must be less than 10",
                 ],
                 restaurant: [(v) => !!v || "Restaurant is required"],
                 dishes: {
@@ -25,7 +25,14 @@ export default {
                     ],
                     servings: [
                         (v) => !!v || "Servings is required",
-                        (v) => (v && v < 10) || "Servings must be less than 10",
+                        (v) => (v && v <= 10) || "Servings must be less than 10",
+                    ],
+                    totalDishes: [
+                        (v) => {
+                            if (!v) return true;
+                            const totalPeople = this.order.totalPeoples;
+                            return v >= totalPeople || "Total dishes must be greater than or equal to total people";
+                        }
                     ]
                 }
             }

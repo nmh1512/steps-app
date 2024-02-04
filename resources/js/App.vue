@@ -45,7 +45,9 @@
             </v-window-item>
 
             <v-window-item value="3">
-              Four
+              <StepReview 
+                :order="order"
+                />
             </v-window-item>
           </v-window>
         </v-card-text>
@@ -78,6 +80,7 @@
 import StepFirst from './components/StepFirst.vue';
 import StepSecond from './components/StepSecond.vue';
 import StepThird from './components/StepThird.vue';
+import StepReview from './components/StepReview.vue'
 
 export default {
   name: 'App',
@@ -85,7 +88,8 @@ export default {
   components: {
     StepFirst,
     StepSecond,
-    StepThird
+    StepThird,
+    StepReview
   },
 
   data: () => ({
@@ -98,50 +102,67 @@ export default {
       totalPeoples: null,
       restaurant: null
     },
-    curentStep: 1
+    currentStep: 1
   }),
   methods: {
     handleNextStep() {
       let stepRefName;
-      switch (this.tab) {
-        case 1:
-          stepRefName = 'stepSecondRef'
-          break;
-        case 2:
-          stepRefName = 'stepThirdRef'
-          break;
-        case 3:
-          stepRefName = 'stepReviewRef'
-          break;
-        default:
-          stepRefName = 'stepFirstRef'
-          break;
-      }
-      const stepRef = this.$refs[stepRefName];
-      stepRef.validateForm().then(res => {
-        if (res.valid) {
-          ++this.tab;
-          ++this.curentStep;
+      if (this.tab < 3) {
+        switch (this.tab) {
+          case 1:
+            stepRefName = 'stepSecondRef'
+            break;
+          case 2:
+            stepRefName = 'stepThirdRef'
+            break;
+          default:
+            stepRefName = 'stepFirstRef'
+            break;
         }
-      })
+        const stepRef = this.$refs[stepRefName];
+        stepRef.validateForm().then(res => {
+          if (res.valid) {
+            ++this.tab;
+          }
+        })
+      } else {
+        console.log(this.order);
+      }
     },
 
     handlePeriousStep() {
-      if (this.tab > 0) --this.tab
+      if (this.tab > 0) {
+        --this.tab
+      }
     },
   
     handleCheckInputValidate(data) {
       this.order = {...this.order, ...data};
-      if(this.order.meal !== data.meal && data.meal !== undefined) {
+      if (this.order.meal !== data.meal && data.meal !== undefined) {
         this.order.totalPeoples = null
       }
-      this[`isDisabledStep${this.curentStep + 1}`] = this.hasFieldEmpty(data)
+      if (this.currentStep === 3) {
+        this[`isDisabledStep4`] = data.dishes.some(item => this.hasFieldEmpty(item)) || !this.isValidTotalDishes(data.totalDishes);
+      } else {
+        this[`isDisabledStep${this.currentStep + 1}`] = this.hasFieldEmpty(data);
+      }
     },
 
     hasFieldEmpty(obj) {
       return Object.values(obj).includes('') || Object.values(obj).includes(null) || Object.values(obj).includes(undefined);
+    },
+    
+    isValidTotalDishes(totalDishes) {
+      return totalDishes >= this.order.totalPeoples;
     }
   },
+  watch: {
+    tab: {
+      handler(newTab) {
+        this.currentStep = newTab + 1
+      }
+    }
+  }
 }
 </script>
 

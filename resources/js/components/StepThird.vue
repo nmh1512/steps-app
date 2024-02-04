@@ -2,7 +2,7 @@
     <v-sheet class="mx-auto">
         <v-form ref="formRef" @submit.prevent>
             <v-row
-                v-for="(item, index) in form.dishes"
+                v-for="(item) in form.dishes"
             >
                 <v-col>
                     <label class="mb-3">Please select a dish</label>
@@ -30,13 +30,24 @@
                     ></v-text-field>
                 </v-col>
             </v-row>
+            
             <v-btn 
                 class="mt-3" 
                 icon="$plus" 
                 variant="tonal"
                 @click="handleAddDish"
                 ></v-btn>
-        </v-form>
+         </v-form>
+         <v-text-field
+            style="width: 50%;"
+            v-model="form.totalDishes"
+            :rules="rules.dishes.totalDishes"
+            @input="handleInput"
+            :readonly="true"
+            label="Total Dishes"
+            class="mt-4"
+            >
+        </v-text-field>
     </v-sheet>
 </template>
 
@@ -53,6 +64,7 @@ export default {
                     servings: 1
                 }
             ],
+            totalDishes: 0
         },
     }),
     computed: {
@@ -64,10 +76,19 @@ export default {
     },
     methods: {
         handleAddDish() {
-            if(this.form.dishes.length === this.dishes.length) return
+            if (this.form.dishes.length === this.dishes.length) return
             this.form.dishes.push({dishName: null, servings: 1})
+            this.handleInput();
         },
     },
+    watch: {
+    form: {
+        handler(newForm) {
+            this.form.totalDishes = newForm.dishes.reduce((total, dish) => total + (parseInt(dish.servings) || 0), 0);
+        },
+        deep: true
+    }
+}
 };
 </script>
 
